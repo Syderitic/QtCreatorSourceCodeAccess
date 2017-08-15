@@ -16,3 +16,6 @@ Binaries
 
 ## Ignore IDE project generated files
 *.user
+
+## Ignore Intermediate
+/Intermediate
