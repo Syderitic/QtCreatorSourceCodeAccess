@@ -21,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "QtCreatorSourceCodeAccessModule.h"
-#include "QtCreatorSourceCodeAccessPrivatePCH.h"
 #include "Runtime/Core/Public/Features/IModularFeatures.h"
 
 IMPLEMENT_MODULE( FQtCreatorSourceCodeAccessModule, QtCreatorSourceCodeAccess );

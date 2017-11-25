@@ -24,8 +24,11 @@
 // instead of relying on FDesktopPlatformModule.
 
 #include "QtCreatorSourceCodeAccessor.h"
-#include "QtCreatorSourceCodeAccessPrivatePCH.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/Paths.h"
 #include "DesktopPlatformModule.h"
+#include "Misc/UProjectInfo.h"
+#include "Misc/App.h"
 
 #define LOCTEXT_NAMESPACE "QtCreatorSourceCodeAccessor"
 
@@ -90,6 +93,54 @@ bool FQtCreatorSourceCodeAccessor::OpenSolution()
                 }
         }
         return false;
+}
+
+bool FQtCreatorSourceCodeAccessor::OpenSolutionAtPath(const FString& InSolutionPath)
+{
+        FString FullPath;
+        FString FilenamePart;
+        FString ExtensionPart;
+        if ( FPaths::FileExists( InSolutionPath ) )
+        {
+                FString ProjectFolder;
+                FPaths::Split(FullPath, ProjectFolder, FilenamePart, ExtensionPart);
+                        FString Filename = FilenamePart + FString(TEXT(".pro"));
+                        FString CodeSolutionFile = FPaths::Combine(*ProjectFolder, *Filename);
+                        FString Editor = FString(TEXT("/usr/bin/qtcreator"));
+                        FString Args = FString(TEXT("-client "));
+
+                        // Add this to handle spaces in path names.
+                        const FString NewFullPath = FString::Printf(TEXT("\"%s\""), *CodeSolutionFile);
+
+                        Args.Append(NewFullPath);
+                        if(FLinuxPlatformProcess::CreateProc(*Editor,
+                                                             *Args,
+                                                             true,
+                                                             true,
+                                                             false,
+                                                             nullptr,
+                                                             0,
+                                                             nullptr,
+                                                             nullptr).IsValid())
+                        {
+                                return true;
+                        }
+        }
+        return false;
+}
+
+bool FQtCreatorSourceCodeAccessor::DoesSolutionExist() const
+{
+  FString SolutionPath;
+  if(FDesktopPlatformModule::Get()->GetSolutionPath(SolutionPath))
+  {
+        UE_LOG(LogQtCreatorAccessor, Display, TEXT("SolutionPath: %s"), *SolutionPath);
+        return FPaths::FileExists(SolutionPath);
+  }
+  return false;
+  // FString SolutionPath = GetSolutionPath();
+  // UE_LOG(LogQtCreatorAccessor, Display, TEXT("SolutionPath: %s"), *SolutionPath);
+  // return FPaths::FileExists(SolutionPath);
 }
 
 bool FQtCreatorSourceCodeAccessor::OpenFileAtLine(const FString& FullPath, int32 LineNumber, int32 ColumnNumber)
